@@ -1,1 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puppy Feeds - Pet Store</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
 
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f9f5ff, #ffe8f0);
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 20px 0;
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: #8e24aa;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .container,
+    .cart-view {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 40px 20px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .container.active,
+    .cart-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 15px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+      width: 280px;
+      margin: 20px;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .product-image-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: transform 0.4s ease-in-out;
+    }
+
+    .product-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 15px;
+      text-align: center;
+    }
+
+    .product-info h3 {
+      margin: 8px 0 4px;
+      color: #4a148c;
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .product-info p {
+      color: #6a1b9a;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .add-to-cart-button {
+      background-color: #8e24aa;
+      color: #fff;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .add-to-cart-button:hover {
+      background-color: #6a1b9a;
+      transform: translateY(-2px);
+    }
+
+    .cart-view h2 {
+      width: 100%;
+      text-align: center;
+      color: #4a148c;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      margin: 15px;
+      padding: 15px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .cart-item img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 20px;
+    }
+
+    .cart-item .details {
+      flex: 1;
+    }
+
+    .cart-item .details p {
+      margin: 6px 0;
+      color: #4a148c;
+      font-size: 16px;
+    }
+
+    .cart-item .remove-button {
+      background-color: #ff5252;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .cart-item .remove-button:hover {
+      background-color: #e53935;
+      transform: translateY(-1px);
+    }
+
+    .back-button {
+      display: block;
+      margin: 30px auto 0;
+      background-color: #6a1b9a;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .back-button:hover {
+      background-color: #4a148c;
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <header>Wiggle Wags</header>
+
+  <div class="container active" id="productList"></div>
+
+  <div class="cart-view" id="cartView">
+    <h2>Your Cart</h2>
+    <div id="cartItems"><p>Your cart is empty.</p></div>
+    <button class="back-button" onclick="showProducts()">Back to Products</button>
+  </div>
+
+  <script>
+    const products = [
+      { id: 1, name: 'Pedigree Dog Food', price: 510.00, img: 'https://m.media-amazon.com/images/I/51YHRFOlU7L._SX300_SY300_QL70_FMwebp_.jpg' },
+      { id: 2, name: 'Purepet Cat Food', price: 480.00, img: 'https://rukminim2.flixcart.com/image/1100/1300/xif0q/pet-food/p/9/n/1-cat-1-9950647-purepet-original-imagjsbe5g5ddggh.jpeg?q=20&crop=false' },
+      { id: 3, name: 'Optimum Fish Food', price: 445.00, img: 'https://m.media-amazon.com/images/I/71T5RbesolL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 4, name: 'Vetenex Birds Food', price: 445.00, img: 'https://m.media-amazon.com/images/I/51EozUuAMiL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 5, name: 'Drools Puppy Food', price: 670.00, img: 'https://m.media-amazon.com/images/I/61N6d7o6LiL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 6, name: 'Me-O Tuna Cat Food', price: 350.00, img: 'https://m.media-amazon.com/images/I/51tOyR6+O2L._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 7, name: 'Royal Canin Kitten Food', price: 720.00, img: 'https://m.media-amazon.com/images/I/61FtWLYU2xL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 8, name: 'Whiskas Adult Wet Food (Chicken)', price: 280.00, img: 'https://m.media-amazon.com/images/I/61I5SROxAXL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 9, name: 'Sheba Wet Food (Salmon)', price: 315.00, img: 'https://m.media-amazon.com/images/I/61bZeFTXn0L._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 10, name: 'Taste of the Wild (Salmon)', price: 890.00, img: 'https://m.media-amazon.com/images/I/81XNMeBuOEL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 11, name: 'Blue Buffalo Life Protection (Lamb)', price: 950.00, img: 'https://m.media-amazon.com/images/I/81LoAjj8HVL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 12, name: 'Hill\'s Science Diet (Chicken)', price: 780.00, img: 'https://m.media-amazon.com/images/I/811D-qkHlyL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 13, name: 'Orijen Original Dog Food', price: 1150.00, img: 'https://m.media-amazon.com/images/I/61BrVwSgblL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 14, name: 'Acana Regionals (Wild Prairie)', price: 1020.00, img: 'https://m.media-amazon.com/images/I/7165gShljLL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 15, name: 'Nutro Wholesome Essentials (Chicken)', price: 620.00, img: 'https://m.media-amazon.com/images/I/61hT0e3mtsL._AC_UL480_FMwebp_QL65_.jpg' },
+      { id: 16, name: 'Solid Gold (Lamb & Brown Rice)', price: 810.00, img: 'https://m.media-amazon.com/images/I/61K4jIl-e9L._AC_UL480_FMwebp_QL65_.jpg' }
+    ];
+
+    let cart = {};
+
+    function renderProducts() {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+      products.forEach(product => {
+        container.innerHTML += `
+          <div class="product-card">
+            <div class="product-image-container">
+              <img src="${product.img}" alt="${product.name}" />
+            </div>
+            <div class="product-info">
+              <h3>${product.name}</h3>
+              <p>₹${product.price.toFixed(2)}</p>
+              <button class="add-to-cart-button" onclick="addToCart(${product.id})">Add to Cart</button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML += `<button class="back-button" onclick="showCart()">Go to Cart</button>`;
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (!cart[id]) cart[id] = { ...product, quantity: 0 };
+      cart[id].quantity += 1;
+      alert(`${product.name} added to cart!`);
+    }
+
+    function showCart() {
+      document.getElementById('productList').classList.remove('active');
+      const cartView = document.getElementById('cartView');
+      cartView.classList.add('active');
+
+      const cartItems = document.getElementById('cartItems');
+      cartItems.innerHTML = '';
+      if (Object.keys(cart).length === 0) {
+        cartItems.innerHTML = '<p>Your cart is empty.</p>';
+        return;
+      }
+
+      for (let id in cart) {
+        const item = cart[id];
+        cartItems.innerHTML += `
+          <div class="cart-item">
+            <img src="${item.img}" alt="${item.name}" />
+            <div class="details">
+              <p>${item.name}</p>
+              <p>₹${(item.price * item.quantity).toFixed(2)} (${item.quantity} × ₹${item.price.toFixed(2)})</p>
+            </div>
+            <button class="remove-button" onclick="removeFromCart(${id})">Remove</button>
+          </div>
+        `;
+      }
+    }
+
+    function showProducts() {
+      document.getElementById('cartView').classList.remove('active');
+      document.getElementById('productList').classList.add('active');
+    }
+
+    function removeFromCart(id) {
+      delete cart[id];
+      showCart();
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
